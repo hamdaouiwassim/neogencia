@@ -11,7 +11,7 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Agent::with(['category', 'user', 'reviews']);
+        $query = Agent::where('is_approved', true)->with(['category', 'user', 'reviews']);
 
         // Filter by category
         if ($request->filled('category')) {
@@ -52,6 +52,7 @@ class HomeController extends Controller
         
         // Get featured agents (not filtered by search/filters)
         $featuredAgents = Agent::where('is_featured', true)
+            ->where('is_approved', true)
             ->with(['category', 'user', 'reviews'])
             ->orderBy('views', 'desc')
             ->limit(6)

@@ -3,11 +3,11 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="font-bold text-3xl text-gray-900 dark:text-white leading-tight">
-                    {{ __('Submit New AI Agent') }}
+                    {{ __('Edit AI Agent') }}
                 </h2>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Share your AI agent with the community</p>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Update your AI agent information</p>
             </div>
-            <a href="{{ route('home') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <a href="{{ route('agents.my-agents') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -38,13 +38,14 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-bold text-white">Agent Information</h3>
-                            <p class="text-indigo-100 text-sm">Fill in the details below to submit your AI agent</p>
+                            <p class="text-indigo-100 text-sm">Update the details below to modify your AI agent</p>
                         </div>
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('agents.store') }}" enctype="multipart/form-data" class="p-8 md:p-10">
+                <form method="POST" action="{{ route('agents.update', $agent) }}" enctype="multipart/form-data" class="p-8 md:p-10">
                     @csrf
+                    @method('PATCH')
 
                     <div class="space-y-8">
                         <!-- Basic Information Section -->
@@ -70,7 +71,7 @@
                                         class="block w-full pl-10" 
                                         type="text" 
                                         name="name" 
-                                        :value="old('name')" 
+                                        :value="old('name', $agent->name)" 
                                         required 
                                         autofocus
                                         placeholder="Enter agent name (e.g., GPT-4, Claude AI)"
@@ -97,7 +98,7 @@
                                     >
                                         <option value="">Select a category</option>
                                         @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                            <option value="{{ $category->id }}" {{ old('category_id', $agent->category_id) == $category->id ? 'selected' : '' }}>
                                                 {{ $category->name }}
                                             </option>
                                         @endforeach
@@ -117,7 +118,7 @@
                                         class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-600/20 shadow-sm transition-all duration-200" 
                                         required
                                         placeholder="Describe what your AI agent does, its key features, and use cases..."
-                                    >{{ old('description') }}</textarea>
+                                    >{{ old('description', $agent->description) }}</textarea>
                                 </div>
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Provide a detailed description to help users understand your agent</p>
@@ -147,7 +148,7 @@
                                         class="block w-full pl-10" 
                                         type="url" 
                                         name="link" 
-                                        :value="old('link')" 
+                                        :value="old('link', $agent->link)" 
                                         placeholder="https://your-agent-url.com" 
                                         required 
                                     />
@@ -170,7 +171,7 @@
                                         class="block w-full pl-10" 
                                         type="url" 
                                         name="documentation" 
-                                        :value="old('documentation')" 
+                                        :value="old('documentation', $agent->documentation)" 
                                         placeholder="https://docs.example.com (Optional)"
                                     />
                                 </div>
@@ -202,7 +203,7 @@
                                         class="block w-full pl-10" 
                                         type="url" 
                                         name="featured_image" 
-                                        :value="old('featured_image')" 
+                                        :value="old('featured_image', $agent->featured_image)" 
                                         placeholder="https://example.com/image.jpg"
                                         onchange="previewImage(this.value)"
                                     />
@@ -233,7 +234,7 @@
                                 <x-input-label for="pricing_type" :value="__('Pricing Type')" />
                                 <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <label class="relative flex cursor-pointer rounded-xl border-2 p-4 focus:outline-none pricing-option border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all" data-value="free">
-                                        <input type="radio" name="pricing_type" value="free" class="sr-only" {{ old('pricing_type', 'free') == 'free' ? 'checked' : '' }} />
+                                        <input type="radio" name="pricing_type" value="free" class="sr-only" {{ old('pricing_type', $agent->pricing_type) == 'free' ? 'checked' : '' }} />
                                         <div class="flex flex-1">
                                             <div class="flex flex-col">
                                                 <span class="block text-sm font-medium text-gray-900 dark:text-white">Free</span>
@@ -246,7 +247,7 @@
                                     </label>
 
                                     <label class="relative flex cursor-pointer rounded-xl border-2 p-4 focus:outline-none pricing-option border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all" data-value="freemium">
-                                        <input type="radio" name="pricing_type" value="freemium" class="sr-only" {{ old('pricing_type') == 'freemium' ? 'checked' : '' }} />
+                                        <input type="radio" name="pricing_type" value="freemium" class="sr-only" {{ old('pricing_type', $agent->pricing_type) == 'freemium' ? 'checked' : '' }} />
                                         <div class="flex flex-1">
                                             <div class="flex flex-col">
                                                 <span class="block text-sm font-medium text-gray-900 dark:text-white">Freemium</span>
@@ -259,7 +260,7 @@
                                     </label>
 
                                     <label class="relative flex cursor-pointer rounded-xl border-2 p-4 focus:outline-none pricing-option border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all" data-value="paid">
-                                        <input type="radio" name="pricing_type" value="paid" class="sr-only" {{ old('pricing_type') == 'paid' ? 'checked' : '' }} />
+                                        <input type="radio" name="pricing_type" value="paid" class="sr-only" {{ old('pricing_type', $agent->pricing_type) == 'paid' ? 'checked' : '' }} />
                                         <div class="flex flex-1">
                                             <div class="flex flex-col">
                                                 <span class="block text-sm font-medium text-gray-900 dark:text-white">Paid</span>
@@ -275,7 +276,7 @@
                             </div>
 
                             <!-- Price -->
-                            <div id="price-field" style="display: none;">
+                            <div id="price-field" style="display: {{ in_array($agent->pricing_type, ['paid', 'freemium']) ? 'block' : 'none' }};">
                                 <x-input-label for="price" :value="__('Price (USD)')" />
                                 <div class="mt-2 relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -288,7 +289,7 @@
                                         name="price" 
                                         step="0.01" 
                                         min="0" 
-                                        :value="old('price', 0)" 
+                                        :value="old('price', $agent->price)" 
                                         placeholder="0.00"
                                     />
                                 </div>
@@ -300,7 +301,7 @@
 
                     <!-- Submit Buttons -->
                     <div class="mt-10 pt-8 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <a href="{{ route('home') }}" class="inline-flex items-center px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                        <a href="{{ route('agents.my-agents') }}" class="inline-flex items-center px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -310,7 +311,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            {{ __('Submit Agent') }}
+                            {{ __('Update Agent') }}
                         </button>
                     </div>
                 </form>

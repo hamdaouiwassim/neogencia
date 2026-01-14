@@ -18,6 +18,7 @@ class Agent extends Model
         'pricing_type',
         'views',
         'is_featured',
+        'is_approved',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class Agent extends Model
             'price' => 'decimal:2',
             'views' => 'integer',
             'is_featured' => 'boolean',
+            'is_approved' => 'boolean',
         ];
     }
 

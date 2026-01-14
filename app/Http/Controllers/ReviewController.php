@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function store(Request $request, Agent $agent)
     {
+        // Prevent users from reviewing their own agents
+        if ($agent->user_id === Auth::id()) {
+            return back()->withErrors(['error' => 'You cannot review your own agent.']);
+        }
+
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
