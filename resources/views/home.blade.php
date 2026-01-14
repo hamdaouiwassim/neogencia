@@ -11,7 +11,7 @@
             <div class="text-center">
                 <div class="inline-block mb-6">
                     <span class="px-4 py-2 bg-white/20 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-white/30">
-                        🚀 The Future of AI is Here
+                        🚀 Welcome to Neogencia
                     </span>
                 </div>
                 <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
@@ -19,7 +19,7 @@
                     <span class="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">AI Agents</span>
                 </h1>
                 <p class="text-xl md:text-2xl text-purple-100 mb-10 max-w-3xl mx-auto leading-relaxed">
-                    Explore, connect, and leverage cutting-edge AI agents that transform how you work and create
+                    Explore, connect, and leverage cutting-edge AI agents that transform how you work and create on Neogencia
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     @auth

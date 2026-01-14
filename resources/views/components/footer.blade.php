@@ -5,7 +5,7 @@
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center mb-4">
                     <x-application-logo class="block h-10 w-auto fill-current text-white" />
-                    <span class="ml-3 text-xl font-bold text-white">AI Agents Marketplace</span>
+                    <span class="ml-3 text-xl font-bold text-white">Neogencia</span>
                 </div>
                 <p class="text-gray-400 mb-4 max-w-md">
                     Discover and explore the best AI agents and models. Connect with creators, find innovative solutions, and power your projects with cutting-edge AI technology.
@@ -83,7 +83,7 @@
         </div>
 
         <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; {{ date('Y') }} AI Agents Marketplace. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} Neogencia. All rights reserved.</p>
         </div>
     </div>
 </footer>
