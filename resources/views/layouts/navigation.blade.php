@@ -14,32 +14,36 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
                         {{ __('Home') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('agents.explore')" :active="request()->routeIs('agents.explore')">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        {{ __('Explore') }}
+                    </x-nav-link>
                     @auth
+                        <x-nav-link :href="route('home') . '#ai-workforce'" :active="false">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            {{ __('AI Workforce') }}
+                        </x-nav-link>
                         @if(Auth::user()->isAdmin())
-                            <!-- Admin Menu -->
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                                {{ __('Dashboard') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('admin.agents')" :active="request()->routeIs('admin.agents*')">
-                                {{ __('Agents') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users*')">
-                                {{ __('Users') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('admin.reviews')" :active="request()->routeIs('admin.reviews*')">
-                                {{ __('Reviews') }}
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                {{ __('Admin') }}
                             </x-nav-link>
                         @else
-                            <!-- Regular User Menu -->
-                            <x-nav-link :href="route('agents.create')" :active="request()->routeIs('agents.create')">
-                                {{ __('Submit Agent') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('agents.my-agents')" :active="request()->routeIs('agents.my-agents')">
-                                {{ __('My Agents') }}
-                            </x-nav-link>
                             <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
                                 {{ __('Dashboard') }}
                             </x-nav-link>
                         @endif
@@ -116,6 +120,16 @@
 
                             <!-- Menu Items -->
                             <div class="py-1">
+                                <!-- Explore Link (Available to All Users) -->
+                                <x-dropdown-link :href="route('agents.explore')" class="flex items-center">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                    {{ __('Explore Agents') }}
+                                </x-dropdown-link>
+
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
                                 @if($user->isAdmin())
                                     <!-- Admin Menu Items -->
                                     <x-dropdown-link :href="route('admin.dashboard')" class="flex items-center">
@@ -170,6 +184,13 @@
                                         {{ __('Submit Agent') }}
                                     </x-dropdown-link>
 
+                                    <x-dropdown-link :href="route('chatbot.test')" class="flex items-center">
+                                        <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                        {{ __('Chatbot Test') }}
+                                    </x-dropdown-link>
+
                                     <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                 @endif
 
@@ -195,12 +216,12 @@
                             </div>
                         </x-slot>
                     </x-dropdown>
-                    @else
-                        <div class="space-x-4">
-                            <a href="{{ route('login') }}" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">Login</a>
-                            <a href="{{ route('register') }}" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">Register</a>
-                        </div>
-                    @endauth
+                @else
+                    <div class="space-x-4">
+                        <a href="{{ route('login') }}" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">Login</a>
+                        <a href="{{ route('register') }}" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">Register</a>
+                    </div>
+                @endauth
             </div>
 
             <!-- Hamburger -->
@@ -219,32 +240,36 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
                 {{ __('Home') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('agents.explore')" :active="request()->routeIs('agents.explore')">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                {{ __('Explore') }}
+            </x-responsive-nav-link>
             @auth
+                <x-responsive-nav-link :href="route('home') . '#ai-workforce'" :active="false">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    {{ __('AI Workforce') }}
+                </x-responsive-nav-link>
                 @if(Auth::user()->isAdmin())
-                    <!-- Admin Menu -->
                     <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.agents')" :active="request()->routeIs('admin.agents*')">
-                        {{ __('Agents') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users*')">
-                        {{ __('Users') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.reviews')" :active="request()->routeIs('admin.reviews*')">
-                        {{ __('Reviews') }}
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        {{ __('Admin') }}
                     </x-responsive-nav-link>
                 @else
-                    <!-- Regular User Menu -->
-                    <x-responsive-nav-link :href="route('agents.create')" :active="request()->routeIs('agents.create')">
-                        {{ __('Submit Agent') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('agents.my-agents')" :active="request()->routeIs('agents.my-agents')">
-                        {{ __('My Agents') }}
-                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
                         {{ __('Dashboard') }}
                     </x-responsive-nav-link>
                 @endif
@@ -293,34 +318,24 @@
                 </div>
 
                 <div class="mt-3 space-y-1">
+                    <!-- Explore Link (Available to All Users) -->
+                    <x-responsive-nav-link :href="route('agents.explore')" class="flex items-center">
+                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        {{ __('Explore Agents') }}
+                    </x-responsive-nav-link>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
                     @if($user->isAdmin())
-                        <!-- Admin Menu Items -->
                         <x-responsive-nav-link :href="route('admin.dashboard')" class="flex items-center">
                             <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                             </svg>
                             {{ __('Admin Dashboard') }}
                         </x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('admin.agents')" class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            {{ __('Manage Agents') }}
-                        </x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('admin.users')" class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                            {{ __('Manage Users') }}
-                        </x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('admin.reviews')" class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                            </svg>
-                            {{ __('Manage Reviews') }}
-                        </x-responsive-nav-link>
                     @else
-                        <!-- Regular User Menu Items -->
                         <x-responsive-nav-link :href="route('dashboard')" class="flex items-center">
                             <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -336,7 +351,6 @@
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
 
-                    <!-- Authentication -->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <x-responsive-nav-link :href="route('logout')"
@@ -357,6 +371,6 @@
                     <a href="{{ route('register') }}" class="block px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Register</a>
                 </div>
             </div>
-        @endauth
+        @endguest
     </div>
 </nav>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Agent;
+use App\Models\ChatbotModel;
+use App\Models\ChatbotSetting;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -154,5 +156,104 @@ class AdminController extends Controller
     {
         $review->delete();
         return back()->with('success', 'Review deleted successfully!');
+    }
+
+    /**
+     * Chatbot models management.
+     */
+    public function chatbotModels()
+    {
+        $models = ChatbotModel::ordered()->get();
+        return view('admin.chatbot-models.index', compact('models'));
+    }
+
+    public function storeChatbotModel(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'api_name' => 'required|string|max:255',
+        ]);
+
+        $isDefault = $request->boolean('is_default');
+        if ($isDefault) {
+            ChatbotModel::query()->update(['is_default' => false]);
+        }
+
+        $sortOrder = ChatbotModel::max('sort_order') + 1;
+
+        ChatbotModel::create([
+            'name' => $request->name,
+            'api_name' => $request->api_name,
+            'is_default' => $isDefault,
+            'sort_order' => $sortOrder,
+        ]);
+
+        return back()->with('success', 'Chatbot model added successfully!');
+    }
+
+    public function updateChatbotModel(Request $request, ChatbotModel $chatbotModel)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'api_name' => 'required|string|max:255',
+        ]);
+
+        $isDefault = $request->boolean('is_default');
+        if ($isDefault) {
+            ChatbotModel::where('id', '!=', $chatbotModel->id)->update(['is_default' => false]);
+        }
+
+        $chatbotModel->update([
+            'name' => $request->name,
+            'api_name' => $request->api_name,
+            'is_default' => $isDefault,
+        ]);
+
+        return back()->with('success', 'Chatbot model updated successfully!');
+    }
+
+    public function setDefaultChatbotModel(ChatbotModel $chatbotModel)
+    {
+        ChatbotModel::query()->update(['is_default' => false]);
+        $chatbotModel->update(['is_default' => true]);
+        return back()->with('success', 'Default model updated successfully!');
+    }
+
+    public function deleteChatbotModel(ChatbotModel $chatbotModel)
+    {
+        $chatbotModel->delete();
+        return back()->with('success', 'Chatbot model deleted successfully!');
+    }
+
+    /**
+     * Chatbot settings (API params).
+     */
+    public function chatbotSettings()
+    {
+        $settings = ChatbotSetting::get();
+        return view('admin.chatbot-settings.index', compact('settings'));
+    }
+
+    public function updateChatbotSettings(Request $request)
+    {
+        $request->validate([
+            'base_url' => 'required|string|url|max:500',
+            'api_key' => 'nullable|string|max:500',
+            'temperature' => 'required|numeric|min:0|max:2',
+            'max_tokens' => 'required|integer|min:1|max:4096',
+        ]);
+
+        $settings = ChatbotSetting::get();
+        $data = [
+            'base_url' => rtrim($request->base_url, '/'),
+            'temperature' => (float) $request->temperature,
+            'max_tokens' => (int) $request->max_tokens,
+        ];
+        if ($request->filled('api_key')) {
+            $data['api_key'] = $request->api_key;
+        }
+        $settings->update($data);
+
+        return back()->with('success', 'Chatbot settings updated successfully!');
     }
 }

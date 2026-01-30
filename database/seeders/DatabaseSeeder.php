@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             PricingPlanSeeder::class,
             AgentSeeder::class,
+            ChatbotModelSeeder::class,
+            ChatbotSettingSeeder::class,
         ]);
 
         // User::factory(10)->create();

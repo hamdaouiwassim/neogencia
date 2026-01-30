@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'chatbot' => [
+        'base_url' => env('CHATBOT_BASE_URL', 'https://api.ai.cc/v1'),
+        'api_key' => env('CHATBOT_API_KEY', ''),
+        'model' => env('CHATBOT_MODEL', 'mistralai/Mistral-7B-Instruct-v0.2'),
+        'temperature' => env('CHATBOT_TEMPERATURE', 0.7),
+        'max_tokens' => env('CHATBOT_MAX_TOKENS', 256),
+    ],
+
 ];
