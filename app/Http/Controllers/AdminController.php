@@ -8,7 +8,10 @@ use App\Models\ChatbotSetting;
 use App\Models\Review;
 use App\Models\SignupInvitation;
 use App\Models\User;
+use App\Mail\SignupInvitationMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -279,22 +282,26 @@ class AdminController extends Controller
     public function storeSignupInvitation(Request $request)
     {
         $validated = $request->validate([
-            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
             'expires_in_days' => ['nullable', 'integer', 'min:1', 'max:365'],
         ]);
 
-        $expiresAt = isset($validated['expires_in_days'])
-            ? now()->addDays((int) $validated['expires_in_days'])
-            : null;
+        $invitation = DB::transaction(function () use ($request, $validated) {
+            $expiresAt = isset($validated['expires_in_days'])
+                ? now()->addDays((int) $validated['expires_in_days'])
+                : null;
 
-        SignupInvitation::create([
-            'token' => Str::random(64),
-            'email' => $validated['email'] ?? null,
-            'invited_by' => $request->user()->id,
-            'expires_at' => $expiresAt,
-        ]);
+            return SignupInvitation::create([
+                'token' => Str::random(64),
+                'email' => $validated['email'],
+                'invited_by' => $request->user()->id,
+                'expires_at' => $expiresAt,
+            ]);
+        });
 
-        return back()->with('success', __('Invitation created. Copy the link below.'));
+        Mail::to($invitation->email)->send(new SignupInvitationMail($invitation));
+
+        return back()->with('success', __('Invitation created and sent by email.'));
     }
 
     public function destroySignupInvitation(SignupInvitation $signupInvitation)

@@ -15,16 +15,17 @@
                 <form method="POST" action="{{ route('admin.signup-invitations.store') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     @csrf
                     <div class="md:col-span-5">
-                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Email (optional)') }}</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Recipient email') }}</label>
                         <input
                             type="email"
+                            required
                             name="email"
                             id="email"
                             value="{{ old('email') }}"
-                            placeholder="{{ __('Any email; leave blank for open invite') }}"
+                            placeholder="{{ __('name@example.com') }}"
                             class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
                         />
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('If set, signup must use exactly this address.') }}</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('The invitation link is emailed to this address and signup is locked to it.') }}</p>
                     </div>
                     <div class="md:col-span-3">
                         <label for="expires_in_days" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Expires in (days)') }}</label>
