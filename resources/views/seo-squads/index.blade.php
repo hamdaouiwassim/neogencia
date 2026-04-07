@@ -2,16 +2,14 @@
     <x-slot name="header">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    {{ __('SEO Squads') }}
-                </h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your AI model squads for comprehensive SEO analysis</p>
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ __('SEO Squads') }}</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Run multi-model SEO audits that produce clearer priorities and faster action.') }}</p>
             </div>
-            <a href="{{ route('seo-squads.create') }}" class="inline-flex items-center bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <a href="{{ route('seo-squads.create') }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-                Create New Squad
+                {{ __('Create Squad') }}
             </a>
         </div>
     </x-slot>
@@ -20,18 +18,36 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @include('admin.partials.alerts')
 
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Active Squads') }}</p>
+                    <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $squads->where('is_active', true)->count() }}</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('Ready to analyze pages right now.') }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Models Assigned') }}</p>
+                    <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $squads->sum(fn ($squad) => $squad->squadModels->count()) }}</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('Specialists covering technical + content + keyword tasks.') }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Workflow Value') }}</p>
+                    <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-white">{{ __('One brief, many expert outputs') }}</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('Reduce analysis time and focus on ranked next steps.') }}</p>
+                </div>
+            </div>
+
             @if($squads->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($squads as $squad)
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-2xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2">
+                        <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
                             <div class="p-6">
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="flex-1">
-                                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                                            {{ $squad->name }}
-                                        </h3>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $squad->name }}</h3>
                                         @if($squad->description)
                                             <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ $squad->description }}</p>
+                                        @else
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ __('No description yet. Add one to clarify team goals.') }}</p>
                                         @endif
                                     </div>
                                     <div class="ml-3">
@@ -43,17 +59,20 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-4">
-                                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                <div class="mb-4 space-y-3">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <div class="flex items-center text-gray-600 dark:text-gray-400">
                                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
                                         </svg>
                                         {{ $squad->squadModels->count() }} Model{{ $squad->squadModels->count() !== 1 ? 's' : '' }}
+                                        </div>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Updated ') }}{{ $squad->updated_at->diffForHumans() }}</span>
                                     </div>
                                     <div class="flex flex-wrap gap-1.5">
                                         @foreach($squad->squadModels->take(3) as $squadModel)
                                             <span class="px-2 py-0.5 text-xs font-medium rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
-                                                {{ $squadModel->chatbotModel->name }}
+                                                {{ \App\Models\SeoSquad::getTaskRoles()[$squadModel->task_role] ?? $squadModel->task_role }}
                                             </span>
                                         @endforeach
                                         @if($squad->squadModels->count() > 3)
@@ -61,6 +80,10 @@
                                                 +{{ $squad->squadModels->count() - 3 }} more
                                             </span>
                                         @endif
+                                    </div>
+                                    <div class="rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 px-3 py-2">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Expected value') }}</p>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ __('Get cross-checking recommendations so you can prioritize fixes with higher confidence.') }}</p>
                                     </div>
                                 </div>
 
@@ -92,19 +115,19 @@
                     @endforeach
                 </div>
             @else
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-2xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 p-12 text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 p-12 text-center shadow-sm">
+                    <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No SEO Squads Yet</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">Create your first SEO squad to start comprehensive SEO analysis with multiple AI models.</p>
-                    <a href="{{ route('seo-squads.create') }}" class="inline-flex items-center bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('No SEO Squads Yet') }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">{{ __('Build a squad of specialist roles (technical, content, keywords) and get a sharper action plan per page.') }}</p>
+                    <a href="{{ route('seo-squads.create') }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-sm transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        Create Your First Squad
+                        {{ __('Create Your First Squad') }}
                     </a>
                 </div>
             @endif

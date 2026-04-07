@@ -4,6 +4,48 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | SMTP (.env)
+    |--------------------------------------------------------------------------
+    |
+    | Typical production setup:
+    |
+    |   MAIL_MAILER=smtp
+    |   MAIL_HOST=smtp.example.com
+    |   MAIL_PORT=587
+    |   MAIL_USERNAME=your-username
+    |   MAIL_PASSWORD=your-password
+    |   MAIL_SCHEME=tls          (optional; port 465 often uses MAIL_SCHEME=smtps)
+    |   MAIL_FROM_ADDRESS=noreply@example.com
+    |   MAIL_FROM_NAME="${APP_NAME}"
+    |   MAIL_CONTACT_TO=hello@example.com
+    |
+    | Or use a single DSN (overrides host/port/user/password when set):
+    |
+    |   MAIL_URL=smtp://user:pass@host:587
+    |
+    | OVHcloud (MX Plan / email included with hosting):
+    |
+    |   MAIL_MAILER=smtp
+    |   MAIL_HOST=ssl0.ovh.net
+    |   MAIL_USERNAME=your-full-address@yourdomain.com
+    |   MAIL_PASSWORD=your-mailbox-password
+    |   MAIL_FROM_ADDRESS must match an authorized mailbox on your domain.
+    |
+    |   Prefer port 465 + implicit TLS:
+    |     MAIL_PORT=465
+    |     MAIL_SCHEME=smtps
+    |
+    |   Or port 587 + STARTTLS:
+    |     MAIL_PORT=587
+    |     MAIL_SCHEME=tls
+    |
+    | Exchange / other OVH offers may use a different outgoing host; check the
+    | OVH help centre for your product.
+    |
+    */
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Mailer
     |--------------------------------------------------------------------------
     |
@@ -113,6 +155,19 @@ return [
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contact form recipient
+    |--------------------------------------------------------------------------
+    |
+    | Address that receives messages from the public contact form.
+    |
+    */
+
+    'contact' => [
+        'to' => env('MAIL_CONTACT_TO', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
     ],
 
 ];

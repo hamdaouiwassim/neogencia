@@ -12,10 +12,16 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
+    Route::get('register', [RegisteredUserController::class, 'createLanding'])
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::get('register/{token}', [RegisteredUserController::class, 'create'])
+        ->where('token', '[A-Za-z0-9]{32,128}')
+        ->name('register.invite');
+
+    Route::post('register/{token}', [RegisteredUserController::class, 'store'])
+        ->where('token', '[A-Za-z0-9]{32,128}')
+        ->name('register.invite.store');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');

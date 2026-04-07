@@ -7,10 +7,19 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SeoSquadController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/ai-workforce', [HomeController::class, 'aiWorkforce'])->name('ai-workforce');
 Route::get('/agents/explore', [HomeController::class, 'explore'])->name('agents.explore');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [HomeController::class, 'contactSubmit'])->name('contact.submit');
+Route::get('/privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-of-service', [HomeController::class, 'termsOfService'])->name('terms-of-service');
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/map.xml', [SitemapController::class, 'index'])->name('map');
 
 // Agent routes - specific routes must come before parameterized routes
 Route::middleware('auth')->group(function () {
@@ -29,15 +38,15 @@ Route::get('/agents/{agent}', [AgentController::class, 'show'])->name('agents.sh
 // Authenticated user routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Chatbot Test
     Route::get('/chatbot/test', [ChatbotTestController::class, 'index'])->name('chatbot.test');
     Route::post('/chatbot/test', [ChatbotTestController::class, 'test'])->name('chatbot.test.submit');
-    
+
     // SEO Squads
     Route::resource('seo-squads', SeoSquadController::class);
     Route::post('/seo-squads/{seoSquad}/analyze', [SeoSquadController::class, 'analyze'])->name('seo-squads.analyze');
-    
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -46,19 +55,19 @@ Route::middleware('auth')->group(function () {
 // Admin routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'index'])->name('dashboard');
-    
+
     // Agents management
     Route::get('/agents', [App\Http\Controllers\AdminController::class, 'agents'])->name('agents');
     Route::post('/agents/{agent}/approve', [App\Http\Controllers\AdminController::class, 'approveAgent'])->name('agents.approve');
     Route::post('/agents/{agent}/reject', [App\Http\Controllers\AdminController::class, 'rejectAgent'])->name('agents.reject');
     Route::post('/agents/{agent}/feature', [App\Http\Controllers\AdminController::class, 'featureAgent'])->name('agents.feature');
     Route::delete('/agents/{agent}', [App\Http\Controllers\AdminController::class, 'deleteAgent'])->name('agents.delete');
-    
+
     // Users management
     Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('users');
     Route::post('/users/{user}/update-role', [App\Http\Controllers\AdminController::class, 'updateUserRole'])->name('users.update-role');
     Route::delete('/users/{user}', [App\Http\Controllers\AdminController::class, 'deleteUser'])->name('users.delete');
-    
+
     // Reviews management
     Route::get('/reviews', [App\Http\Controllers\AdminController::class, 'reviews'])->name('reviews');
     Route::delete('/reviews/{review}', [App\Http\Controllers\AdminController::class, 'deleteReview'])->name('reviews.delete');
@@ -73,6 +82,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Chatbot settings
     Route::get('/chatbot-settings', [App\Http\Controllers\AdminController::class, 'chatbotSettings'])->name('chatbot-settings');
     Route::put('/chatbot-settings', [App\Http\Controllers\AdminController::class, 'updateChatbotSettings'])->name('chatbot-settings.update');
+
+    // Signup invitations (invitation-only registration)
+    Route::get('/signup-invitations', [App\Http\Controllers\AdminController::class, 'signupInvitations'])->name('signup-invitations');
+    Route::post('/signup-invitations', [App\Http\Controllers\AdminController::class, 'storeSignupInvitation'])->name('signup-invitations.store');
+    Route::delete('/signup-invitations/{signupInvitation}', [App\Http\Controllers\AdminController::class, 'destroySignupInvitation'])->name('signup-invitations.destroy');
 });
 
 require __DIR__.'/auth.php';

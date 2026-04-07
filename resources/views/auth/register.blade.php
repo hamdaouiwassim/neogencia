@@ -1,5 +1,5 @@
-<x-guest-layout title="Create Account" subtitle="Join our community and discover amazing AI agents">
-    <form method="POST" action="{{ route('register') }}" class="space-y-6">
+<x-guest-layout title="Create Account" :subtitle="__('Complete your account using your invitation')">
+    <form method="POST" action="{{ route('register.invite.store', $signupInvitation->token) }}" class="space-y-6">
         @csrf
 
         <!-- Name -->
@@ -40,10 +40,12 @@
                     class="block mt-1 w-full pl-10" 
                     type="email" 
                     name="email" 
-                    :value="old('email')" 
+                    :value="old('email', $signupInvitation->email)" 
                     required 
                     autocomplete="username"
                     placeholder="Enter your email"
+                    :readonly="(bool) $signupInvitation->email"
+                    :class="$signupInvitation->email ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''"
                 />
             </div>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />

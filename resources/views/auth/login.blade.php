@@ -88,12 +88,12 @@
         <!-- Register Link -->
         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                {{ __("Don't have an account?") }}
+                {{ __('Need an account?') }}
                 <a 
                     href="{{ route('register') }}" 
                     class="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
                 >
-                    {{ __('Create one now') }}
+                    {{ __('Invitation-only signup') }}
                 </a>
             </p>
         </div>

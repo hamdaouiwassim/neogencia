@@ -57,6 +57,16 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
+    public function chatbotConversations()
+    {
+        return $this->hasMany(ChatbotConversation::class);
+    }
+
+    public function signupInvitationsCreated()
+    {
+        return $this->hasMany(SignupInvitation::class, 'invited_by');
+    }
+
     public function isCreator(): bool
     {
         return $this->role === 'creator';

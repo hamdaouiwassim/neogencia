@@ -5,7 +5,7 @@
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                     {{ $seoSquad->name }}
                 </h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $seoSquad->description ?: 'Use this squad for comprehensive SEO analysis' }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $seoSquad->description ?: 'Turn one URL brief into a prioritized SEO action plan.' }}</p>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('seo-squads.edit', $seoSquad) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-all">
@@ -28,20 +28,90 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @include('admin.partials.alerts')
 
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Specialist Roles</p>
+                    <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $seoSquad->squadModels->count() }}</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Coverage across technical, content, keyword, and strategy lenses.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Decision Quality</p>
+                    <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-white">Cross-validated recommendations</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Compare multiple expert outputs before committing implementation time.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Expected Outcome</p>
+                    <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-white">Faster prioritization</p>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Identify high-impact fixes, quick wins, and risks in one run.</p>
+                </div>
+            </div>
+
             <!-- Squad Info -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-2xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 p-6">
-                <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Squad Configuration</h3>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($seoSquad->squadModels as $squadModel)
-                                <div class="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-800">
-                                    <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300">{{ $squadModel->chatbotModel->name }}</div>
-                                    <div class="text-xs text-indigo-600 dark:text-indigo-400">{{ $taskRoles[$squadModel->task_role] ?? $squadModel->task_role }}</div>
-                                </div>
-                            @endforeach
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Squad Workflow</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Your models run in sequence to produce a complete SEO plan.</p>
+                    </div>
+                    <span class="text-xs px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        {{ $seoSquad->squadModels->count() }} Step{{ $seoSquad->squadModels->count() !== 1 ? 's' : '' }}
+                    </span>
+                </div>
+
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-4 sm:p-5">
+                    <div class="overflow-x-auto">
+                        <div class="min-w-[760px]">
+                            <div class="relative flex items-stretch gap-4">
+                                @foreach($seoSquad->squadModels->sortBy('sort_order')->values() as $index => $squadModel)
+                                    <div class="relative flex-1 min-w-[220px]">
+                                        <div class="h-full rounded-xl border-2 border-indigo-200 dark:border-indigo-800 bg-white dark:bg-gray-800 p-4 shadow-sm">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold">
+                                                    {{ $index + 1 }}
+                                                </span>
+                                                <span class="text-[11px] px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300">
+                                                    {{ __('Node') }} {{ $index + 1 }}
+                                                </span>
+                                            </div>
+                                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-snug">
+                                                {{ $taskRoles[$squadModel->task_role] ?? $squadModel->task_role }}
+                                            </h4>
+                                            <p class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                                {{ __('Model:') }} {{ $squadModel->chatbotModel->name }}
+                                            </p>
+                                            <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                                <p class="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Output') }}</p>
+                                                <p class="text-xs text-gray-700 dark:text-gray-300 mt-1">
+                                                    {{ __('Recommendations for this specialist role.') }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        @if(!$loop->last)
+                                            <div class="hidden lg:flex absolute top-1/2 -right-3 transform -translate-y-1/2 items-center">
+                                                <div class="w-6 border-t-2 border-dashed border-indigo-300 dark:border-indigo-700"></div>
+                                                <svg class="w-4 h-4 text-indigo-400 dark:text-indigo-500 -ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
+                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('Flow: each node contributes insights that feed into the next decision step.') }}
+                    </p>
+                </div>
+
+                <div class="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-3">
+                    <p class="text-sm text-emerald-800 dark:text-emerald-200">
+                        <span class="font-semibold">Execution tip:</span>
+                        Start with Step 1 output, then refine decisions using later steps for stronger prioritization.
+                    </p>
+                </div>
+                <div class="mt-4">
                     @if(!$seoSquad->is_active)
                         <div class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
                             <p class="text-sm text-yellow-800 dark:text-yellow-200 font-medium">This squad is inactive</p>
@@ -51,8 +121,9 @@
             </div>
 
             <!-- Analysis Form -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-2xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 p-6" id="analysis-form-view">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Run SEO Analysis</h3>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 p-6" id="analysis-form-view">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Run SEO Analysis</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Provide a URL, optional keywords/content, and get structured recommendations from each specialist role.</p>
                 
                 <form id="analysis-form" class="space-y-4">
                     @csrf
@@ -77,7 +148,7 @@
                                   placeholder="Paste page content here for more accurate analysis"></textarea>
                     </div>
 
-                    <button type="submit" id="analyze-btn" class="w-full inline-flex items-center justify-center bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                    <button type="submit" id="analyze-btn" class="w-full inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-sm transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
@@ -88,7 +159,7 @@
 
             <!-- Results View -->
             <div id="results-view" class="hidden space-y-4">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-2xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white">Analysis Results</h3>
@@ -102,6 +173,8 @@
                         </button>
                     </div>
 
+                    <div id="results-summary" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5"></div>
+
                     <div id="results-container" class="space-y-4">
                         <!-- Results will be populated here -->
                     </div>
@@ -114,6 +187,15 @@
         const analyzeUrl = '{{ route("seo-squads.analyze", $seoSquad) }}';
         const taskRoles = @json($taskRoles);
 
+        function escapeHtml(text) {
+            return String(text ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
         document.getElementById('analysis-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -123,6 +205,7 @@
             const analyzeText = document.getElementById('analyze-text');
             const resultsContainer = document.getElementById('results-container');
             const resultsUrl = document.getElementById('results-url');
+            const resultsSummary = document.getElementById('results-summary');
             
             const url = document.getElementById('url').value;
             const keywords = document.getElementById('target_keywords').value;
@@ -131,6 +214,8 @@
             // Show loading state
             analyzeBtn.disabled = true;
             analyzeText.textContent = 'Analyzing...';
+            resultsSummary.classList.add('hidden');
+            resultsSummary.innerHTML = '';
             resultsContainer.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div><p class="mt-4 text-gray-600 dark:text-gray-400">Running analysis with all models...</p></div>';
 
             try {
@@ -154,22 +239,45 @@
                 if (data.success) {
                     resultsUrl.textContent = `Analyzed: ${url}`;
                     resultsContainer.innerHTML = '';
+                    const successCount = data.results.filter((result) => result.success).length;
+                    const errorCount = data.results.length - successCount;
+                    const totalTokens = data.results.reduce((sum, result) => sum + (result.usage?.total_tokens || 0), 0);
+
+                    resultsSummary.innerHTML = `
+                        <div class="rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-900/20 p-3">
+                            <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">Successful Roles</p>
+                            <p class="mt-1 text-2xl font-bold text-emerald-800 dark:text-emerald-200">${successCount}</p>
+                        </div>
+                        <div class="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-900/20 p-3">
+                            <p class="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-300 font-semibold">Needs Review</p>
+                            <p class="mt-1 text-2xl font-bold text-amber-800 dark:text-amber-200">${errorCount}</p>
+                        </div>
+                        <div class="rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-900/20 p-3">
+                            <p class="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-300 font-semibold">Token Spend</p>
+                            <p class="mt-1 text-2xl font-bold text-blue-800 dark:text-blue-200">${totalTokens.toLocaleString()}</p>
+                        </div>
+                    `;
+                    resultsSummary.classList.remove('hidden');
 
                     data.results.forEach((result, index) => {
                         const resultCard = document.createElement('div');
-                        resultCard.className = 'bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 border-2 border-gray-200 dark:border-gray-700';
+                        resultCard.className = 'bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700';
                         
                         if (result.success) {
                             resultCard.innerHTML = `
                                 <div class="flex items-start justify-between mb-4">
                                     <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">${result.task_role_name}</h4>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400">Model: ${result.model_name}</p>
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">${escapeHtml(result.task_role_name)}</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Model: ${escapeHtml(result.model_name)}</p>
                                     </div>
                                     <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Success</span>
                                 </div>
+                                <div class="mb-3 p-3 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/60 dark:bg-indigo-900/20">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">How to use this output</p>
+                                    <p class="text-sm text-indigo-900 dark:text-indigo-200 mt-1">Extract 2-3 actions from this role and combine with other role outputs into a prioritized sprint list.</p>
+                                </div>
                                 <div class="prose dark:prose-invert max-w-none">
-                                    <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${result.response}</div>
+                                    <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${escapeHtml(result.response)}</div>
                                 </div>
                                 ${result.usage ? `<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
                                     Tokens: ${result.usage.prompt_tokens || 0} prompt + ${result.usage.completion_tokens || 0} completion = ${result.usage.total_tokens || 0} total
@@ -179,14 +287,14 @@
                             resultCard.innerHTML = `
                                 <div class="flex items-start justify-between mb-4">
                                     <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">${result.task_role_name}</h4>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400">Model: ${result.model_name}</p>
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">${escapeHtml(result.task_role_name)}</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Model: ${escapeHtml(result.model_name)}</p>
                                     </div>
                                     <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Error</span>
                                 </div>
                                 <div class="text-red-600 dark:text-red-400">
-                                    <p class="font-medium">${result.error || 'Unknown error'}</p>
-                                    ${result.message ? `<p class="text-sm mt-1">${result.message}</p>` : ''}
+                                    <p class="font-medium">${escapeHtml(result.error || 'Unknown error')}</p>
+                                    ${result.message ? `<p class="text-sm mt-1">${escapeHtml(result.message)}</p>` : ''}
                                 </div>
                             `;
                         }
@@ -211,6 +319,8 @@
         function resetAnalysis() {
             document.getElementById('analysis-form-view').classList.remove('hidden');
             document.getElementById('results-view').classList.add('hidden');
+            document.getElementById('results-summary').classList.add('hidden');
+            document.getElementById('results-summary').innerHTML = '';
             document.getElementById('analysis-form').reset();
         }
     </script>

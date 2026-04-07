@@ -41,6 +41,18 @@
                     <li>
                         <a href="{{ route('home') }}" class="text-gray-400 hover:text-white transition-colors">Home</a>
                     </li>
+                    <li>
+                        <a href="{{ route('ai-workforce') }}" class="text-gray-400 hover:text-white transition-colors">{{ __('AI Workforce') }}</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-white transition-colors">{{ __('Contact') }}</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('privacy-policy') }}" class="text-gray-400 hover:text-white transition-colors">{{ __('Privacy Policy') }}</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('terms-of-service') }}" class="text-gray-400 hover:text-white transition-colors">{{ __('Terms of Service') }}</a>
+                    </li>
                     @auth
                         <li>
                             <a href="{{ route('agents.create') }}" class="text-gray-400 hover:text-white transition-colors">Submit Agent</a>
@@ -70,13 +82,13 @@
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">API Reference</a>
                     </li>
                     <li>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Us</a>
+                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-white transition-colors">{{ __('Contact us') }}</a>
                     </li>
                     <li>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="{{ route('privacy-policy') }}" class="text-gray-400 hover:text-white transition-colors">{{ __('Privacy Policy') }}</a>
                     </li>
                     <li>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                        <a href="{{ route('terms-of-service') }}" class="text-gray-400 hover:text-white transition-colors">{{ __('Terms of Service') }}</a>
                     </li>
                 </ul>
             </div>

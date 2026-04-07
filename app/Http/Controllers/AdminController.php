@@ -6,9 +6,10 @@ use App\Models\Agent;
 use App\Models\ChatbotModel;
 use App\Models\ChatbotSetting;
 use App\Models\Review;
+use App\Models\SignupInvitation;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -44,9 +45,9 @@ class AdminController extends Controller
         // Search
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -58,25 +59,29 @@ class AdminController extends Controller
     public function approveAgent(Agent $agent)
     {
         $agent->update(['is_approved' => true]);
+
         return back()->with('success', 'Agent approved successfully!');
     }
 
     public function rejectAgent(Agent $agent)
     {
         $agent->update(['is_approved' => false]);
+
         return back()->with('success', 'Agent rejected successfully!');
     }
 
     public function deleteAgent(Agent $agent)
     {
         $agent->delete();
+
         return back()->with('success', 'Agent deleted successfully!');
     }
 
     public function featureAgent(Agent $agent)
     {
-        $agent->update(['is_featured' => !$agent->is_featured]);
+        $agent->update(['is_featured' => ! $agent->is_featured]);
         $status = $agent->is_featured ? 'featured' : 'unfeatured';
+
         return back()->with('success', "Agent {$status} successfully!");
     }
 
@@ -92,9 +97,9 @@ class AdminController extends Controller
         // Search
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -110,6 +115,7 @@ class AdminController extends Controller
         ]);
 
         $user->update(['role' => $request->role]);
+
         return back()->with('success', 'User role updated successfully!');
     }
 
@@ -121,6 +127,7 @@ class AdminController extends Controller
         }
 
         $user->delete();
+
         return back()->with('success', 'User deleted successfully!');
     }
 
@@ -136,14 +143,14 @@ class AdminController extends Controller
         // Search
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('comment', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('agent', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('user', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('agent', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -155,6 +162,7 @@ class AdminController extends Controller
     public function deleteReview(Review $review)
     {
         $review->delete();
+
         return back()->with('success', 'Review deleted successfully!');
     }
 
@@ -164,6 +172,7 @@ class AdminController extends Controller
     public function chatbotModels()
     {
         $models = ChatbotModel::ordered()->get();
+
         return view('admin.chatbot-models.index', compact('models'));
     }
 
@@ -216,12 +225,14 @@ class AdminController extends Controller
     {
         ChatbotModel::query()->update(['is_default' => false]);
         $chatbotModel->update(['is_default' => true]);
+
         return back()->with('success', 'Default model updated successfully!');
     }
 
     public function deleteChatbotModel(ChatbotModel $chatbotModel)
     {
         $chatbotModel->delete();
+
         return back()->with('success', 'Chatbot model deleted successfully!');
     }
 
@@ -231,6 +242,7 @@ class AdminController extends Controller
     public function chatbotSettings()
     {
         $settings = ChatbotSetting::get();
+
         return view('admin.chatbot-settings.index', compact('settings'));
     }
 
@@ -255,5 +267,40 @@ class AdminController extends Controller
         $settings->update($data);
 
         return back()->with('success', 'Chatbot settings updated successfully!');
+    }
+
+    public function signupInvitations()
+    {
+        $invitations = SignupInvitation::with('inviter')->latest()->paginate(20);
+
+        return view('admin.signup-invitations.index', compact('invitations'));
+    }
+
+    public function storeSignupInvitation(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255'],
+            'expires_in_days' => ['nullable', 'integer', 'min:1', 'max:365'],
+        ]);
+
+        $expiresAt = isset($validated['expires_in_days'])
+            ? now()->addDays((int) $validated['expires_in_days'])
+            : null;
+
+        SignupInvitation::create([
+            'token' => Str::random(64),
+            'email' => $validated['email'] ?? null,
+            'invited_by' => $request->user()->id,
+            'expires_at' => $expiresAt,
+        ]);
+
+        return back()->with('success', __('Invitation created. Copy the link below.'));
+    }
+
+    public function destroySignupInvitation(SignupInvitation $signupInvitation)
+    {
+        $signupInvitation->delete();
+
+        return back()->with('success', __('Invitation removed.'));
     }
 }

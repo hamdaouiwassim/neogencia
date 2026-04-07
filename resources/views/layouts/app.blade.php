@@ -29,7 +29,11 @@
             // Define public routes that should show navbar even for authenticated users
             $publicRoutes = [
                 'home',
+                'ai-workforce',
                 'agents.explore',  // Public explore agents page
+                'contact',
+                'privacy-policy',
+                'terms-of-service',
                 'agents.show',  // Public agent detail page
                 'login',
                 'register',
@@ -103,6 +107,12 @@
                                         {{ __('Dashboard') }}
                                     @elseif(request()->routeIs('agents.*'))
                                         {{ __('Agents') }}
+                                    @elseif(request()->routeIs('contact'))
+                                        {{ __('Contact') }}
+                                    @elseif(request()->routeIs('privacy-policy'))
+                                        {{ __('Privacy Policy') }}
+                                    @elseif(request()->routeIs('terms-of-service'))
+                                        {{ __('Terms of Service') }}
                                     @elseif(request()->routeIs('chatbot.*'))
                                         {{ __('Chatbot Test') }}
                                     @else

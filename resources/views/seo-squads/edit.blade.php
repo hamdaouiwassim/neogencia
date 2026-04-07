@@ -85,17 +85,20 @@
         </div>
     </div>
 
-    <script>
-        let modelRowCount = 0;
-        const taskRoles = @json($taskRoles);
-        const models = @json($models);
-        const existingModels = @json($seoSquad->squadModels->map(function($sm) {
+    @php
+        $existingSquadModelsData = $seoSquad->squadModels->map(function ($sm) {
             return [
                 'model_id' => $sm->chatbot_model_id,
                 'task_role' => $sm->task_role,
                 'system_prompt' => $sm->system_prompt,
             ];
-        }));
+        })->values()->all();
+    @endphp
+    <script>
+        let modelRowCount = 0;
+        const taskRoles = @json($taskRoles);
+        const models = @json($models);
+        const existingModels = @json($existingSquadModelsData);
 
         function addModelRow(modelData = null) {
             const container = document.getElementById('models-container');
