@@ -15,11 +15,12 @@ class SeoSquadController extends Controller
 {
     public function index()
     {
-        $squads = SeoSquad::where('user_id', Auth::id())
-            ->with(['squadModels.chatbotModel'])
-            ->latest()
-            ->get();
-        
+        $query = SeoSquad::query()->with(['squadModels.chatbotModel'])->latest();
+        if (! Auth::user()->isAdmin()) {
+            $query->where('is_active', true);
+        }
+        $squads = $query->get();
+
         return view('seo-squads.index', compact('squads'));
     }
 
@@ -27,7 +28,7 @@ class SeoSquadController extends Controller
     {
         $models = ChatbotModel::ordered()->get();
         $taskRoles = SeoSquad::getTaskRoles();
-        
+
         return view('seo-squads.create', compact('models', 'taskRoles'));
     }
 
@@ -64,38 +65,25 @@ class SeoSquadController extends Controller
 
     public function show(SeoSquad $seoSquad)
     {
-        // Ensure user owns this squad
-        if ($seoSquad->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access.');
-        }
+        $this->ensureCanUseSquad($seoSquad);
 
         $seoSquad->load(['squadModels.chatbotModel']);
         $taskRoles = SeoSquad::getTaskRoles();
-        
+
         return view('seo-squads.show', compact('seoSquad', 'taskRoles'));
     }
 
     public function edit(SeoSquad $seoSquad)
     {
-        // Ensure user owns this squad
-        if ($seoSquad->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         $seoSquad->load(['squadModels.chatbotModel']);
         $models = ChatbotModel::ordered()->get();
         $taskRoles = SeoSquad::getTaskRoles();
-        
+
         return view('seo-squads.edit', compact('seoSquad', 'models', 'taskRoles'));
     }
 
     public function update(Request $request, SeoSquad $seoSquad)
     {
-        // Ensure user owns this squad
-        if ($seoSquad->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
@@ -131,11 +119,6 @@ class SeoSquadController extends Controller
 
     public function destroy(SeoSquad $seoSquad)
     {
-        // Ensure user owns this squad
-        if ($seoSquad->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access.');
-        }
-
         $seoSquad->delete();
 
         return redirect()->route('seo-squads.index')->with('success', 'SEO Squad deleted successfully!');
@@ -143,12 +126,9 @@ class SeoSquadController extends Controller
 
     public function analyze(Request $request, SeoSquad $seoSquad)
     {
-        // Ensure user owns this squad
-        if ($seoSquad->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access.');
-        }
+        $this->ensureCanUseSquad($seoSquad);
 
-        if (!$seoSquad->is_active) {
+        if (! $seoSquad->is_active && ! Auth::user()->isAdmin()) {
             return response()->json([
                 'success' => false,
                 'error' => 'Squad is not active',
@@ -162,7 +142,7 @@ class SeoSquadController extends Controller
         ]);
 
         $seoSquad->load(['squadModels.chatbotModel']);
-        
+
         if ($seoSquad->squadModels->isEmpty()) {
             return response()->json([
                 'success' => false,
@@ -186,28 +166,28 @@ class SeoSquadController extends Controller
         }
 
         $results = [];
-        $apiUrl = rtrim($baseUrl, '/') . '/chat/completions';
+        $apiUrl = rtrim($baseUrl, '/').'/chat/completions';
 
         // Process each model in the squad
         foreach ($seoSquad->squadModels as $squadModel) {
             $taskRole = $squadModel->task_role;
             $taskRoleName = SeoSquad::getTaskRoles()[$taskRole] ?? $taskRole;
             $model = $squadModel->chatbotModel;
-            
+
             // Build task-specific prompt
             $userPrompt = $this->buildTaskPrompt($taskRole, $request->input('url'), $request->input('target_keywords'), $request->input('content'));
             $systemPrompt = $squadModel->system_prompt ?: $this->getDefaultSystemPrompt($taskRole);
 
             try {
                 $messages = [];
-                if (!empty($systemPrompt)) {
+                if (! empty($systemPrompt)) {
                     $messages[] = ['role' => 'system', 'content' => $systemPrompt];
                 }
                 $messages[] = ['role' => 'user', 'content' => $userPrompt];
 
                 $response = Http::timeout(120)
                     ->withHeaders([
-                        'Authorization' => 'Bearer ' . $apiKey,
+                        'Authorization' => 'Bearer '.$apiKey,
                         'Content-Type' => 'application/json',
                     ])
                     ->post($apiUrl, [
@@ -220,7 +200,7 @@ class SeoSquadController extends Controller
                 if ($response->successful()) {
                     $data = $response->json();
                     $aiResponse = $data['choices'][0]['message']['content'] ?? 'No response content found';
-                    
+
                     $results[] = [
                         'task_role' => $taskRole,
                         'task_role_name' => $taskRoleName,
@@ -232,23 +212,23 @@ class SeoSquadController extends Controller
                 } else {
                     $errorBody = $response->json();
                     $errorMessage = $errorBody['error']['message'] ?? $errorBody['error'] ?? $response->body();
-                    
+
                     $results[] = [
                         'task_role' => $taskRole,
                         'task_role_name' => $taskRoleName,
                         'model_name' => $model->name,
                         'success' => false,
-                        'error' => 'API request failed: ' . $response->status(),
+                        'error' => 'API request failed: '.$response->status(),
                         'message' => $errorMessage,
                     ];
                 }
             } catch (\Exception $e) {
-                Log::error('SEO Squad API Error: ' . $e->getMessage(), [
+                Log::error('SEO Squad API Error: '.$e->getMessage(), [
                     'squad_id' => $seoSquad->id,
                     'task_role' => $taskRole,
                     'trace' => $e->getTraceAsString(),
                 ]);
-                
+
                 $results[] = [
                     'task_role' => $taskRole,
                     'task_role_name' => $taskRoleName,
@@ -271,42 +251,42 @@ class SeoSquadController extends Controller
     private function buildTaskPrompt(string $taskRole, string $url, ?string $keywords, ?string $content): string
     {
         $base = "Analyze the following URL for SEO: {$url}\n\n";
-        
+
         if ($keywords) {
             $base .= "Target Keywords: {$keywords}\n\n";
         }
-        
+
         if ($content) {
             $base .= "Page Content:\n{$content}\n\n";
         }
 
         switch ($taskRole) {
             case 'keyword_research':
-                return $base . "Provide keyword research recommendations including primary keywords, long-tail keywords, search volume estimates, and keyword difficulty analysis.";
-            
+                return $base.'Provide keyword research recommendations including primary keywords, long-tail keywords, search volume estimates, and keyword difficulty analysis.';
+
             case 'content_optimization':
-                return $base . "Analyze the content and provide specific recommendations for optimization including keyword placement, content structure, readability improvements, and content gaps.";
-            
+                return $base.'Analyze the content and provide specific recommendations for optimization including keyword placement, content structure, readability improvements, and content gaps.';
+
             case 'meta_tags':
-                return $base . "Generate optimized meta tags including title tag (50-60 characters), meta description (150-160 characters), Open Graph tags, and schema markup suggestions.";
-            
+                return $base.'Generate optimized meta tags including title tag (50-60 characters), meta description (150-160 characters), Open Graph tags, and schema markup suggestions.';
+
             case 'competitor_analysis':
-                return $base . "Analyze competitors for this URL/keyword and provide insights on their SEO strategies, backlink profiles, content strategies, and opportunities to outperform them.";
-            
+                return $base.'Analyze competitors for this URL/keyword and provide insights on their SEO strategies, backlink profiles, content strategies, and opportunities to outperform them.';
+
             case 'technical_seo':
-                return $base . "Perform technical SEO analysis including page speed, mobile-friendliness, crawlability, indexability, structured data, and technical recommendations.";
-            
+                return $base.'Perform technical SEO analysis including page speed, mobile-friendliness, crawlability, indexability, structured data, and technical recommendations.';
+
             case 'link_building':
-                return $base . "Provide link building strategy recommendations including target domains, outreach opportunities, content ideas for linkable assets, and link acquisition tactics.";
-            
+                return $base.'Provide link building strategy recommendations including target domains, outreach opportunities, content ideas for linkable assets, and link acquisition tactics.';
+
             case 'content_audit':
-                return $base . "Perform a comprehensive content audit including content quality assessment, duplicate content issues, content gaps, and recommendations for improvement or removal.";
-            
+                return $base.'Perform a comprehensive content audit including content quality assessment, duplicate content issues, content gaps, and recommendations for improvement or removal.';
+
             case 'performance_analysis':
-                return $base . "Analyze SEO performance metrics and provide insights on rankings, traffic trends, conversion opportunities, and actionable recommendations for improvement.";
-            
+                return $base.'Analyze SEO performance metrics and provide insights on rankings, traffic trends, conversion opportunities, and actionable recommendations for improvement.';
+
             default:
-                return $base . "Provide comprehensive SEO analysis and recommendations.";
+                return $base.'Provide comprehensive SEO analysis and recommendations.';
         }
     }
 
@@ -324,5 +304,16 @@ class SeoSquadController extends Controller
         ];
 
         return $roleDescriptions[$taskRole] ?? 'You are an expert SEO specialist. Provide comprehensive, actionable SEO recommendations.';
+    }
+
+    private function ensureCanUseSquad(SeoSquad $seoSquad): void
+    {
+        if (Auth::user()->isAdmin()) {
+            return;
+        }
+
+        if (! $seoSquad->is_active) {
+            abort(403, 'This squad is not available.');
+        }
     }
 }

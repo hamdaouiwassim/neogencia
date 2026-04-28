@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -12,7 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Modify the enum to include 'admin'
+        if (! in_array(Schema::getConnection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            return;
+        }
+
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'creator', 'admin') DEFAULT 'user'");
     }
 
@@ -21,7 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert back to original enum
+        if (! in_array(Schema::getConnection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            return;
+        }
+
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'creator') DEFAULT 'user'");
     }
 };

@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AgentInvokeController;
 use App\Http\Controllers\ChatbotTestController;
+use App\Http\Controllers\CustomerSupportSquadController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
@@ -30,6 +32,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/agents/{agent}', [AgentController::class, 'update'])->name('agents.update');
     Route::delete('/agents/{agent}', [AgentController::class, 'destroy'])->name('agents.destroy');
     Route::post('/agents/{agent}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/agents/{agent}/invoke', [AgentInvokeController::class, 'invoke'])
+        ->middleware('throttle:30,1')
+        ->name('agents.invoke');
 });
 
 // Public agent routes
@@ -43,9 +48,32 @@ Route::middleware('auth')->group(function () {
     Route::get('/chatbot/test', [ChatbotTestController::class, 'index'])->name('chatbot.test');
     Route::post('/chatbot/test', [ChatbotTestController::class, 'test'])->name('chatbot.test.submit');
 
-    // SEO Squads
-    Route::resource('seo-squads', SeoSquadController::class);
+    // Squad CRUD: admins only (register before parameterized GET routes so "create" is not captured as an id)
+    Route::middleware('admin')->group(function () {
+        Route::get('/seo-squads/create', [SeoSquadController::class, 'create'])->name('seo-squads.create');
+        Route::post('/seo-squads', [SeoSquadController::class, 'store'])->name('seo-squads.store');
+        Route::get('/seo-squads/{seoSquad}/edit', [SeoSquadController::class, 'edit'])->name('seo-squads.edit');
+        Route::put('/seo-squads/{seoSquad}', [SeoSquadController::class, 'update'])->name('seo-squads.update');
+        Route::patch('/seo-squads/{seoSquad}', [SeoSquadController::class, 'update']);
+        Route::delete('/seo-squads/{seoSquad}', [SeoSquadController::class, 'destroy'])->name('seo-squads.destroy');
+
+        Route::get('/customer-support-squads/create', [CustomerSupportSquadController::class, 'create'])->name('customer-support-squads.create');
+        Route::post('/customer-support-squads', [CustomerSupportSquadController::class, 'store'])->name('customer-support-squads.store');
+        Route::get('/customer-support-squads/{customerSupportSquad}/edit', [CustomerSupportSquadController::class, 'edit'])->name('customer-support-squads.edit');
+        Route::put('/customer-support-squads/{customerSupportSquad}', [CustomerSupportSquadController::class, 'update'])->name('customer-support-squads.update');
+        Route::patch('/customer-support-squads/{customerSupportSquad}', [CustomerSupportSquadController::class, 'update']);
+        Route::delete('/customer-support-squads/{customerSupportSquad}', [CustomerSupportSquadController::class, 'destroy'])->name('customer-support-squads.destroy');
+    });
+
+    // SEO Squads: all authenticated users may browse active squads and run analysis
+    Route::get('/seo-squads', [SeoSquadController::class, 'index'])->name('seo-squads.index');
     Route::post('/seo-squads/{seoSquad}/analyze', [SeoSquadController::class, 'analyze'])->name('seo-squads.analyze');
+    Route::get('/seo-squads/{seoSquad}', [SeoSquadController::class, 'show'])->name('seo-squads.show');
+
+    // Customer Support Squads: all authenticated users may test squads
+    Route::get('/customer-support-squads', [CustomerSupportSquadController::class, 'index'])->name('customer-support-squads.index');
+    Route::post('/customer-support-squads/{customerSupportSquad}/test', [CustomerSupportSquadController::class, 'test'])->name('customer-support-squads.test');
+    Route::get('/customer-support-squads/{customerSupportSquad}', [CustomerSupportSquadController::class, 'show'])->name('customer-support-squads.show');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -43,7 +43,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('agents.update', $agent) }}" enctype="multipart/form-data" class="p-8 md:p-10">
+                <form method="POST" action="{{ route('agents.update', $agent) }}" enctype="multipart/form-data" class="p-8 md:p-10" x-data="{ mode: '{{ old('execution_mode', $agent->execution_mode ?? 'external') }}' }">
                     @csrf
                     @method('PATCH')
 
@@ -125,6 +125,48 @@
                             </div>
                         </div>
 
+                        <!-- Execution (hosted vs external) -->
+                        <div class="space-y-6">
+                            <div class="flex items-center space-x-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+                                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M9 16h.01"></path>
+                                </svg>
+                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Execution') }}</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-6">
+                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="execution_mode" value="external" class="rounded-full border-gray-300 text-indigo-600" x-model="mode">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('External link') }}</span>
+                                </label>
+                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="execution_mode" value="hosted" class="rounded-full border-gray-300 text-indigo-600" x-model="mode">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('Hosted (Langflow + LangChain)') }}</span>
+                                </label>
+                            </div>
+                            <x-input-error :messages="$errors->get('execution_mode')" class="mt-2" />
+                            <div x-show="mode === 'hosted'" x-cloak class="space-y-4 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/20 p-4">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    {{ __('Langflow builder:') }}
+                                    <a href="{{ config('agent_runtime.langflow_public_url') }}" target="_blank" rel="noopener" class="font-semibold text-indigo-600 dark:text-indigo-400 underline">{{ config('agent_runtime.langflow_public_url') }}</a>
+                                </p>
+                                <div>
+                                    <x-input-label for="langflow_flow_id" :value="__('Langflow flow ID')" />
+                                    <x-text-input id="langflow_flow_id" class="block w-full mt-1" type="text" name="langflow_flow_id" :value="old('langflow_flow_id', $agent->langflow_flow_id)" />
+                                    <x-input-error :messages="$errors->get('langflow_flow_id')" class="mt-2" />
+                                </div>
+                                <div>
+                                    <x-input-label for="langflow_revision" :value="__('Flow revision (optional)')" />
+                                    <x-text-input id="langflow_revision" class="block w-full mt-1" type="text" name="langflow_revision" :value="old('langflow_revision', $agent->langflow_revision)" />
+                                    <x-input-error :messages="$errors->get('langflow_revision')" class="mt-2" />
+                                </div>
+                                <div>
+                                    <x-input-label for="langsmith_project" :value="__('LangSmith project (optional)')" />
+                                    <x-text-input id="langsmith_project" class="block w-full mt-1" type="text" name="langsmith_project" :value="old('langsmith_project', $agent->langsmith_project)" />
+                                    <x-input-error :messages="$errors->get('langsmith_project')" class="mt-2" />
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Links & Resources Section -->
                         <div class="space-y-6">
                             <div class="flex items-center space-x-2 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -150,11 +192,12 @@
                                         name="link" 
                                         :value="old('link', $agent->link)" 
                                         placeholder="https://your-agent-url.com" 
-                                        required 
+                                        x-bind:required="mode === 'external'"
                                     />
                                 </div>
                                 <x-input-error :messages="$errors->get('link')" class="mt-2" />
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">The main URL where users can access or use your agent</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="mode === 'external'">{{ __('The main URL where users access your external agent.') }}</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="mode === 'hosted'" x-cloak>{{ __('Optional for hosted; marketplace URL is updated automatically on save.') }}</p>
                             </div>
 
                             <!-- Documentation URL -->

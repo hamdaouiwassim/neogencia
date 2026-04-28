@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SignupInvitationMail;
 use App\Models\Agent;
 use App\Models\ChatbotModel;
 use App\Models\ChatbotSetting;
 use App\Models\Review;
 use App\Models\SignupInvitation;
 use App\Models\User;
-use App\Mail\SignupInvitationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -61,14 +61,20 @@ class AdminController extends Controller
 
     public function approveAgent(Agent $agent)
     {
-        $agent->update(['is_approved' => true]);
+        $agent->update([
+            'is_approved' => true,
+            'published_to_marketplace_at' => now(),
+        ]);
 
         return back()->with('success', 'Agent approved successfully!');
     }
 
     public function rejectAgent(Agent $agent)
     {
-        $agent->update(['is_approved' => false]);
+        $agent->update([
+            'is_approved' => false,
+            'published_to_marketplace_at' => null,
+        ]);
 
         return back()->with('success', 'Agent rejected successfully!');
     }

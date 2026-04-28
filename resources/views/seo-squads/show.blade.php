@@ -8,12 +8,14 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $seoSquad->description ?: 'Turn one URL brief into a prioritized SEO action plan.' }}</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('seo-squads.edit', $seoSquad) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-all">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                    Edit
-                </a>
+                @if(Auth::user()->isAdmin())
+                    <a href="{{ route('seo-squads.edit', $seoSquad) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-all">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Edit
+                    </a>
+                @endif
                 <a href="{{ route('seo-squads.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -173,9 +175,9 @@
                         </button>
                     </div>
 
-                    <div id="results-summary" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5"></div>
+                    <div id="results-summary" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6"></div>
 
-                    <div id="results-container" class="space-y-4">
+                    <div id="results-container" class="space-y-5">
                         <!-- Results will be populated here -->
                     </div>
                 </div>
@@ -194,6 +196,17 @@
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#039;');
+        }
+
+        function copySquadResult(button) {
+            const card = button.closest('[data-squad-card]');
+            const el = card && card.querySelector('[data-response-text]');
+            if (!el || !navigator.clipboard) return;
+            navigator.clipboard.writeText(el.textContent.trim()).then(function () {
+                const prev = button.getAttribute('data-label') || button.textContent;
+                button.textContent = 'Copied';
+                setTimeout(function () { button.textContent = prev; }, 2000);
+            });
         }
 
         document.getElementById('analysis-form').addEventListener('submit', async function(e) {
@@ -244,61 +257,81 @@
                     const totalTokens = data.results.reduce((sum, result) => sum + (result.usage?.total_tokens || 0), 0);
 
                     resultsSummary.innerHTML = `
-                        <div class="rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-900/20 p-3">
-                            <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">Successful Roles</p>
-                            <p class="mt-1 text-2xl font-bold text-emerald-800 dark:text-emerald-200">${successCount}</p>
+                        <div class="rounded-2xl border border-emerald-200/80 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/40 dark:to-gray-900/40 p-4 shadow-sm">
+                            <p class="text-[11px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold">Successful</p>
+                            <p class="mt-1 text-3xl font-extrabold tabular-nums text-emerald-800 dark:text-emerald-200">${successCount}</p>
+                            <p class="mt-1 text-xs text-emerald-700/80 dark:text-emerald-300/80">Roles completed</p>
                         </div>
-                        <div class="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-900/20 p-3">
-                            <p class="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-300 font-semibold">Needs Review</p>
-                            <p class="mt-1 text-2xl font-bold text-amber-800 dark:text-amber-200">${errorCount}</p>
+                        <div class="rounded-2xl border border-amber-200/80 dark:border-amber-800/60 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/40 dark:to-gray-900/40 p-4 shadow-sm">
+                            <p class="text-[11px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold">Needs review</p>
+                            <p class="mt-1 text-3xl font-extrabold tabular-nums text-amber-800 dark:text-amber-200">${errorCount}</p>
+                            <p class="mt-1 text-xs text-amber-800/70 dark:text-amber-200/70">Errors or empty responses</p>
                         </div>
-                        <div class="rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-900/20 p-3">
-                            <p class="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-300 font-semibold">Token Spend</p>
-                            <p class="mt-1 text-2xl font-bold text-blue-800 dark:text-blue-200">${totalTokens.toLocaleString()}</p>
+                        <div class="rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-gray-900/40 p-4 shadow-sm">
+                            <p class="text-[11px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold">Tokens</p>
+                            <p class="mt-1 text-3xl font-extrabold tabular-nums text-indigo-800 dark:text-indigo-200">${totalTokens.toLocaleString()}</p>
+                            <p class="mt-1 text-xs text-indigo-700/80 dark:text-indigo-300/80">Total reported usage</p>
                         </div>
                     `;
                     resultsSummary.classList.remove('hidden');
 
                     data.results.forEach((result, index) => {
-                        const resultCard = document.createElement('div');
-                        resultCard.className = 'bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700';
-                        
+                        const resultCard = document.createElement('article');
+                        resultCard.setAttribute('data-squad-card', '');
+                        const step = index + 1;
+
                         if (result.success) {
+                            resultCard.className = 'overflow-hidden rounded-2xl border border-gray-200/90 dark:border-gray-600/80 bg-white dark:bg-gray-800/40 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.04]';
                             resultCard.innerHTML = `
-                                <div class="flex items-start justify-between mb-4">
-                                    <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">${escapeHtml(result.task_role_name)}</h4>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400">Model: ${escapeHtml(result.model_name)}</p>
+                                <div class="flex flex-wrap items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-indigo-50 via-white to-purple-50/80 dark:from-indigo-950/50 dark:via-gray-900/80 dark:to-purple-950/40 border-b border-gray-200/80 dark:border-gray-700/80">
+                                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-sm font-bold text-white shadow-md">${step}</span>
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-base font-bold text-gray-900 dark:text-white leading-tight">${escapeHtml(result.task_role_name)}</h4>
+                                        <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+                                            <span class="inline-flex items-center rounded-md bg-white/80 dark:bg-gray-800/80 px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 ring-1 ring-gray-200/80 dark:ring-gray-600">${escapeHtml(result.model_name)}</span>
+                                        </p>
                                     </div>
-                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Success</span>
+                                    <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-200 ring-1 ring-emerald-200/80 dark:ring-emerald-800/60">
+                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                        OK
+                                    </span>
+                                    <button type="button" data-label="Copy" onclick="copySquadResult(this)" class="shrink-0 rounded-lg border border-gray-300/80 dark:border-gray-600 bg-white/90 dark:bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Copy</button>
                                 </div>
-                                <div class="mb-3 p-3 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/60 dark:bg-indigo-900/20">
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">How to use this output</p>
-                                    <p class="text-sm text-indigo-900 dark:text-indigo-200 mt-1">Extract 2-3 actions from this role and combine with other role outputs into a prioritized sprint list.</p>
+                                <p class="mx-4 mt-3 text-xs text-indigo-900/90 dark:text-indigo-100/90 rounded-lg bg-indigo-50/90 dark:bg-indigo-950/40 px-3 py-2 border border-indigo-100 dark:border-indigo-900/50 leading-relaxed">
+                                    <span class="font-semibold text-indigo-700 dark:text-indigo-300">Tip:</span> Pull 2–3 concrete actions from each role, then merge into one prioritized sprint list.
+                                </p>
+                                <div class="px-4 py-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">Output</p>
+                                    <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-950/50">
+                                        <div data-response-text class="max-h-[min(28rem,55vh)] overflow-y-auto overscroll-contain px-4 py-3 text-sm leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap font-sans">${escapeHtml(result.response)}</div>
+                                    </div>
+                                    ${result.usage ? `<div class="mt-3 flex flex-wrap gap-3 text-[11px] text-gray-500 dark:text-gray-400">
+                                        <span class="rounded-md bg-gray-100 dark:bg-gray-900/60 px-2 py-1">In <strong class="text-gray-700 dark:text-gray-300">${(result.usage.prompt_tokens || 0).toLocaleString()}</strong></span>
+                                        <span class="rounded-md bg-gray-100 dark:bg-gray-900/60 px-2 py-1">Out <strong class="text-gray-700 dark:text-gray-300">${(result.usage.completion_tokens || 0).toLocaleString()}</strong></span>
+                                        <span class="rounded-md bg-gray-100 dark:bg-gray-900/60 px-2 py-1">Total <strong class="text-gray-700 dark:text-gray-300">${(result.usage.total_tokens || 0).toLocaleString()}</strong></span>
+                                    </div>` : ''}
                                 </div>
-                                <div class="prose dark:prose-invert max-w-none">
-                                    <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${escapeHtml(result.response)}</div>
-                                </div>
-                                ${result.usage ? `<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-                                    Tokens: ${result.usage.prompt_tokens || 0} prompt + ${result.usage.completion_tokens || 0} completion = ${result.usage.total_tokens || 0} total
-                                </div>` : ''}
                             `;
                         } else {
+                            resultCard.className = 'overflow-hidden rounded-2xl border border-red-200/90 dark:border-red-900/50 bg-white dark:bg-gray-800/40 shadow-sm';
                             resultCard.innerHTML = `
-                                <div class="flex items-start justify-between mb-4">
-                                    <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">${escapeHtml(result.task_role_name)}</h4>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400">Model: ${escapeHtml(result.model_name)}</p>
+                                <div class="flex flex-wrap items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-red-50 to-white dark:from-red-950/40 dark:to-gray-900/80 border-b border-red-100 dark:border-red-900/40">
+                                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-600 text-sm font-bold text-white shadow-md">${step}</span>
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-base font-bold text-gray-900 dark:text-white">${escapeHtml(result.task_role_name)}</h4>
+                                        <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400"><span class="font-medium">${escapeHtml(result.model_name)}</span></p>
                                     </div>
-                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Error</span>
+                                    <span class="shrink-0 rounded-full bg-red-100 dark:bg-red-900/40 px-2.5 py-1 text-xs font-bold text-red-800 dark:text-red-200">Failed</span>
                                 </div>
-                                <div class="text-red-600 dark:text-red-400">
-                                    <p class="font-medium">${escapeHtml(result.error || 'Unknown error')}</p>
-                                    ${result.message ? `<p class="text-sm mt-1">${escapeHtml(result.message)}</p>` : ''}
+                                <div class="px-4 py-4">
+                                    <div class="rounded-xl border border-red-200/80 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 px-4 py-3 text-sm text-red-800 dark:text-red-200">
+                                        <p class="font-semibold">${escapeHtml(result.error || 'Unknown error')}</p>
+                                        ${result.message ? `<p class="mt-2 text-xs opacity-90 whitespace-pre-wrap">${escapeHtml(result.message)}</p>` : ''}
+                                    </div>
                                 </div>
                             `;
                         }
-                        
+
                         resultsContainer.appendChild(resultCard);
                     });
 

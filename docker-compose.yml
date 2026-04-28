@@ -1,0 +1,52 @@
+# Optional stack for hosted agents: Langflow (builder) + agent-runtime (LangChain executor).
+# Laravel runs on the host or Sail; point AGENT_RUNTIME_URL at agent-runtime.
+services:
+  langflow-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: langflow
+      POSTGRES_PASSWORD: langflow
+      POSTGRES_DB: langflow
+    volumes:
+      - langflow_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U langflow -d langflow']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  langflow:
+    image: langflowai/langflow:latest
+    depends_on:
+      langflow-db:
+        condition: service_healthy
+    ports:
+      - '${LANGFLOW_PORT:-7860}:7860'
+    environment:
+      LANGFLOW_DATABASE_URL: postgresql://langflow:langflow@langflow-db:5432/langflow
+      LANGFLOW_AUTO_LOGIN: 'true'
+      LANGFLOW_SKIP_AUTH_AUTO_LOGIN: 'true'
+      LANGFLOW_SECRET_KEY: ${LANGFLOW_SECRET_KEY:-change-me-in-production}
+    volumes:
+      - langflow_data:/app/langflow
+
+  agent-runtime:
+    build:
+      context: ./services/agent-runtime
+      dockerfile: Dockerfile
+    ports:
+      - '${AGENT_RUNTIME_PORT:-8088}:8088'
+    environment:
+      AGENT_RUNTIME_SECRET: ${AGENT_RUNTIME_SECRET:-dev-secret-change-me}
+      LANGFLOW_BASE_URL: ${LANGFLOW_BASE_URL:-http://langflow:7860}
+      LANGFLOW_API_KEY: ""
+      # LangSmith (optional): set on the worker only
+      LANGCHAIN_TRACING_V2: ${LANGCHAIN_TRACING_V2:-false}
+      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY:-}
+      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT:-neogencia-agents}
+    depends_on:
+      - langflow
+
+volumes:
+  langflow_pgdata:
+  langflow_data:

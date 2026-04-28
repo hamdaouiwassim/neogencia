@@ -149,6 +149,135 @@
                                 </div>
                             </div>
 
+                            @if($agent->isHosted())
+                                <div class="mb-8 rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 dark:bg-indigo-950/20 p-6">
+                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-indigo-600 text-white">{{ __('Hosted') }}</span>
+                                        {{ __('Runs on Neogencia') }}
+                                    </h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('Built with Langflow, executed via LangChain. Traces can appear in LangSmith when configured.') }}</p>
+                                    @if($agent->langflow_flow_id)
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('Flow ID') }}: <code class="bg-gray-100 dark:bg-gray-800 px-1 rounded">{{ $agent->langflow_flow_id }}</code></p>
+                                    @endif
+                                    @auth
+                                        @if($agent->is_approved || (int) $agent->user_id === (int) Auth::id() || Auth::user()->isAdmin())
+                                            <div class="space-y-3">
+                                                <label for="hosted-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Try a message') }}</label>
+                                                <textarea id="hosted-input" rows="3" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200" placeholder="{{ __('Type input for the agent…') }}"></textarea>
+                                                <button type="button" id="hosted-invoke-btn" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg">
+                                                    {{ __('Run hosted agent') }}
+                                                </button>
+                                                <div id="hosted-invoke-status" class="text-sm text-gray-600 dark:text-gray-400 hidden"></div>
+                                                <pre id="hosted-invoke-output" class="mt-2 p-4 rounded-lg bg-gray-900 text-gray-100 text-sm whitespace-pre-wrap max-h-64 overflow-y-auto hidden"></pre>
+                                            </div>
+                                            <script>
+                                                document.getElementById('hosted-invoke-btn')?.addEventListener('click', async function () {
+                                                    const input = document.getElementById('hosted-input').value;
+                                                    const status = document.getElementById('hosted-invoke-status');
+                                                    const out = document.getElementById('hosted-invoke-output');
+                                                    status.classList.remove('hidden');
+                                                    out.classList.add('hidden');
+                                                    status.textContent = '{{ __('Running…') }}';
+                                                    try {
+                                                        const res = await fetch('{{ route('agents.invoke', $agent) }}', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                                'Accept': 'application/json',
+                                                                'X-Requested-With': 'XMLHttpRequest',
+                                                            },
+                                                            body: JSON.stringify({ input }),
+                                                        });
+                                                        const data = await res.json();
+                                                        if (!data.success) {
+                                                            status.textContent = data.error || '{{ __('Failed') }}';
+                                                            return;
+                                                        }
+                                                        status.textContent = (data.latency_ms != null ? ('{{ __('Done in') }} ' + data.latency_ms + ' ms · ') : '') + (data.source || '');
+                                                        out.textContent = data.output && String(data.output).trim() !== '' ? data.output : '[Empty output returned by runtime]';
+                                                        out.classList.remove('hidden');
+                                                    } catch (e) {
+                                                        status.textContent = e.message || '{{ __('Request failed') }}';
+                                                    }
+                                                });
+                                            </script>
+                                        @endif
+                                    @else
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Log in to run this hosted agent.') }}</p>
+                                    @endauth
+                                </div>
+                            @endif
+
+                            @if(isset($invocations) && $invocations->isNotEmpty())
+                                <div class="mb-8" x-data="{ outputModalOpen: false, outputModalTitle: '', outputModalContent: '' }">
+                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">{{ __('Recent runs (monitoring)') }}</h3>
+                                    <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                                        <table class="min-w-full text-sm">
+                                            <thead class="bg-gray-50 dark:bg-gray-900/80 text-left text-gray-600 dark:text-gray-400">
+                                                <tr>
+                                                    <th class="px-3 py-2">{{ __('When') }}</th>
+                                                    <th class="px-3 py-2">{{ __('Status') }}</th>
+                                                    <th class="px-3 py-2">{{ __('ms') }}</th>
+                                                    <th class="px-3 py-2">{{ __('Source') }}</th>
+                                                    <th class="px-3 py-2">{{ __('Trace') }}</th>
+                                                    <th class="px-3 py-2">{{ __('Output') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                                @foreach($invocations as $run)
+                                                    <tr class="text-gray-800 dark:text-gray-200">
+                                                        <td class="px-3 py-2 whitespace-nowrap">{{ $run->created_at->diffForHumans() }}</td>
+                                                        <td class="px-3 py-2">{{ $run->status }}</td>
+                                                        <td class="px-3 py-2">{{ $run->latency_ms ?? '—' }}</td>
+                                                        <td class="px-3 py-2">{{ $run->runtime_source ?? '—' }}</td>
+                                                        <td class="px-3 py-2">
+                                                            @if($run->trace_url)
+                                                                <a href="{{ $run->trace_url }}" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-400 underline">{{ __('LangSmith') }}</a>
+                                                            @elseif($run->langsmith_run_id)
+                                                                <span class="text-xs font-mono">{{ Str::limit($run->langsmith_run_id, 12) }}</span>
+                                                            @else
+                                                                —
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-3 py-2 max-w-xs">
+                                                            @if($run->output)
+                                                                <div class="text-xs whitespace-pre-wrap text-gray-700 dark:text-gray-300 max-h-24 overflow-y-auto">{{ Str::limit($run->output, 140) }}</div>
+                                                                <button type="button" class="mt-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                                                                    @click="outputModalTitle='{{ __('Run output') }} · {{ $run->created_at->diffForHumans() }}'; outputModalContent=@js($run->output); outputModalOpen=true">
+                                                                    {{ __('View full output') }}
+                                                                </button>
+                                                            @elseif($run->error)
+                                                                <div class="text-xs text-red-600 dark:text-red-400">{{ Str::limit($run->error, 120) }}</div>
+                                                                <button type="button" class="mt-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                                                                    @click="outputModalTitle='{{ __('Run error') }} · {{ $run->created_at->diffForHumans() }}'; outputModalContent=@js($run->error); outputModalOpen=true">
+                                                                    {{ __('View full details') }}
+                                                                </button>
+                                                            @else
+                                                                —
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div x-show="outputModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="outputModalOpen=false">
+                                        <div class="absolute inset-0 bg-black/60" @click="outputModalOpen=false"></div>
+                                        <div class="relative w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
+                                            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-700">
+                                                <h4 class="font-semibold text-gray-900 dark:text-gray-100" x-text="outputModalTitle"></h4>
+                                                <button type="button" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" @click="outputModalOpen=false">✕</button>
+                                            </div>
+                                            <div class="p-5">
+                                                <pre class="text-sm whitespace-pre-wrap max-h-[65vh] overflow-y-auto text-gray-800 dark:text-gray-200" x-text="outputModalContent"></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                             <!-- Action Buttons -->
                             <div class="flex flex-wrap gap-4 mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
                                 <a href="{{ $agent->link }}" target="_blank" class="group inline-flex items-center bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">

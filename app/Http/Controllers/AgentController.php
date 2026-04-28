@@ -6,6 +6,7 @@ use App\Models\Agent;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class AgentController extends Controller
 {
@@ -15,13 +16,14 @@ class AgentController extends Controller
             ->with(['category', 'reviews'])
             ->latest()
             ->paginate(12);
-        
+
         return view('agents.index', compact('agents'));
     }
 
     public function create()
     {
         $categories = Category::all();
+
         return view('agents.create', compact('categories'));
     }
 
@@ -31,17 +33,30 @@ class AgentController extends Controller
             'name' => 'required|string|max:255',
             'featured_image' => 'nullable|url|max:500',
             'description' => 'required|string',
-            'link' => 'required|url',
+            'link' => ['nullable', 'url', 'max:500', Rule::requiredIf(fn () => $request->input('execution_mode', 'external') === 'external')],
             'documentation' => 'nullable|url',
             'category_id' => 'required|exists:categories,id',
             'price' => 'nullable|numeric|min:0',
             'pricing_type' => 'required|in:free,paid,freemium',
+            'execution_mode' => 'required|in:external,hosted',
+            'langflow_flow_id' => ['nullable', 'string', 'max:255', Rule::requiredIf(fn () => $request->input('execution_mode') === 'hosted')],
+            'langflow_revision' => 'nullable|string|max:64',
+            'langsmith_project' => 'nullable|string|max:255',
         ]);
 
         $validated['user_id'] = Auth::id();
-        $validated['is_approved'] = false; // New agents need admin approval
+        $validated['is_approved'] = false;
+        $validated['execution_mode'] = $validated['execution_mode'] ?? 'external';
 
-        Agent::create($validated);
+        if (($validated['execution_mode'] ?? '') === 'hosted' && empty($validated['link'])) {
+            $validated['link'] = config('app.url');
+        }
+
+        $agent = Agent::create($validated);
+
+        if ($agent->isHosted()) {
+            $agent->update(['link' => route('agents.show', $agent, absolute: true)]);
+        }
 
         return redirect()->route('agents.my-agents')->with('success', 'AI Agent submitted successfully!');
     }
@@ -49,7 +64,7 @@ class AgentController extends Controller
     public function show(Agent $agent)
     {
         // Only show approved agents to non-admins
-        if (!$agent->is_approved && (!auth()->check() || !auth()->user()->isAdmin())) {
+        if (! $agent->is_approved && (! auth()->check() || ! auth()->user()->isAdmin())) {
             abort(404, 'Agent not found or pending approval.');
         }
 
@@ -57,10 +72,18 @@ class AgentController extends Controller
         if ($agent->is_approved) {
             $agent->incrementViews();
         }
-        
+
         $agent->load(['category', 'user', 'reviews.user']);
-        
-        return view('agents.show', compact('agent'));
+
+        $invocations = collect();
+        if (auth()->check()) {
+            $u = auth()->user();
+            if ((int) $agent->user_id === (int) $u->id || $u->isAdmin()) {
+                $invocations = $agent->invocations()->latest()->limit(30)->get();
+            }
+        }
+
+        return view('agents.show', compact('agent', 'invocations'));
     }
 
     public function edit(Agent $agent)
@@ -71,6 +94,7 @@ class AgentController extends Controller
         }
 
         $categories = Category::all();
+
         return view('agents.edit', compact('agent', 'categories'));
     }
 
@@ -85,14 +109,22 @@ class AgentController extends Controller
             'name' => 'required|string|max:255',
             'featured_image' => 'nullable|url|max:500',
             'description' => 'required|string',
-            'link' => 'required|url',
+            'link' => ['nullable', 'url', 'max:500', Rule::requiredIf(fn () => $request->input('execution_mode', $agent->execution_mode ?? 'external') === 'external')],
             'documentation' => 'nullable|url',
             'category_id' => 'required|exists:categories,id',
             'price' => 'nullable|numeric|min:0',
             'pricing_type' => 'required|in:free,paid,freemium',
+            'execution_mode' => 'required|in:external,hosted',
+            'langflow_flow_id' => ['nullable', 'string', 'max:255', Rule::requiredIf(fn () => $request->input('execution_mode') === 'hosted')],
+            'langflow_revision' => 'nullable|string|max:64',
+            'langsmith_project' => 'nullable|string|max:255',
         ]);
 
         $agent->update($validated);
+
+        if ($agent->isHosted()) {
+            $agent->update(['link' => route('agents.show', $agent, absolute: true)]);
+        }
 
         return redirect()->route('agents.my-agents')->with('success', 'Agent updated successfully!');
     }

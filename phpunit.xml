@@ -31,5 +31,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="AGENT_RUNTIME_URL" value="http://agent-runtime.test"/>
+        <env name="AGENT_RUNTIME_SECRET" value="test-secret"/>
     </php>
 </phpunit>

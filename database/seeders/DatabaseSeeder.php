@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             PricingPlanSeeder::class,
             AgentSeeder::class,
+            TopInternetAgentsSeeder::class,
             ChatbotModelSeeder::class,
             ChatbotSettingSeeder::class,
         ]);

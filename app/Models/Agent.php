@@ -19,6 +19,11 @@ class Agent extends Model
         'views',
         'is_featured',
         'is_approved',
+        'execution_mode',
+        'langflow_flow_id',
+        'langflow_revision',
+        'langsmith_project',
+        'published_to_marketplace_at',
     ];
 
     protected function casts(): array
@@ -28,7 +33,18 @@ class Agent extends Model
             'views' => 'integer',
             'is_featured' => 'boolean',
             'is_approved' => 'boolean',
+            'published_to_marketplace_at' => 'datetime',
         ];
+    }
+
+    public function isHosted(): bool
+    {
+        return $this->execution_mode === 'hosted';
+    }
+
+    public function invocations()
+    {
+        return $this->hasMany(AgentInvocation::class);
     }
 
     public function user()

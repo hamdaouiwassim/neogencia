@@ -54,175 +54,113 @@
                         </h2>
                         <p class="text-lg text-gray-600 dark:text-gray-400">Curated selection of the best AI agents you should try</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-16">
                         @foreach($featuredAgents as $agent)
-                            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-indigo-500/30 dark:border-indigo-400/30 group relative">
-                                <div class="absolute top-4 right-4 z-10">
-                                    <span class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-                                        ⭐ Featured
+                            <a href="{{ route('agents.show', $agent) }}" class="bg-white dark:bg-gray-800 p-3 rounded-xl border-2 border-indigo-500/30 dark:border-indigo-400/30 shadow-sm hover:shadow-md transition-all duration-200 group relative overflow-hidden">
+                                <div class="absolute top-2 right-2 z-10">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white shadow-lg ring-1 ring-white/40 dark:ring-white/20">
+                                        <span aria-hidden="true">★</span>{{ __('Featured') }}
                                     </span>
                                 </div>
-                                @if($agent->featured_image)
-                                    <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                                        <img src="{{ $agent->featured_image }}" alt="{{ $agent->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+                                        @if($agent->featured_image)
+                                            <img src="{{ $agent->featured_image }}" alt="{{ $agent->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+                                        @else
+                                            <span class="text-sm font-bold text-indigo-600 dark:text-indigo-300">{{ strtoupper(substr($agent->name, 0, 1)) }}</span>
+                                        @endif
                                     </div>
-                                @endif
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                            <a href="{{ route('agents.show', $agent) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400">
-                                                {{ $agent->name }}
-                                            </a>
-                                        </h3>
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                            {{ $agent->pricing_type === 'free' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : '' }}
-                                            {{ $agent->pricing_type === 'paid' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : '' }}
-                                            {{ $agent->pricing_type === 'freemium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : '' }}">
-                                            {{ ucfirst($agent->pricing_type) }}
-                                        </span>
-                                    </div>
-                                    
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                                        {{ $agent->description }}
-                                    </p>
-                                    
-                                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                        <span class="flex items-center">
-                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                            </svg>
-                                            {{ number_format($agent->averageRating(), 1) }} ({{ $agent->reviewsCount() }})
-                                        </span>
-                                        <span>{{ $agent->views }} views</span>
-                                    </div>
-                                    
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $agent->category->name }}
-                                        </span>
-                                        <a href="{{ route('agents.show', $agent) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
-                                            View Details
-                                            <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                            </svg>
-                                        </a>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" title="{{ $agent->name }}">{{ $agent->name }}</p>
+                                        <p class="mt-1 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{{ $agent->description }}</p>
+                                        <p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                            {{ number_format($agent->averageRating(), 1) }}/5 · {{ $agent->reviewsCount() }} reviews
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         @endforeach
                     </div>
                 </div>
             @endif
 
-            <!-- Search and Filters -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-2xl sm:rounded-3xl mb-12 p-8 border-2 border-gray-200/50 dark:border-gray-700/50">
-                <div class="text-center mb-6">
-                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
-                        Discover <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">AI Agents</span>
-                    </h2>
-                    <p class="text-gray-600 dark:text-gray-400">Search and filter through our collection of AI agents</p>
-                </div>
-                <form method="GET" action="{{ route('agents.explore') }}" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
-                    <div class="flex-1">
-                        <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                               placeholder="Search agents..." 
-                               class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 transition-all">
-                    </div>
-                    
-                    <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select name="category" id="category" class="rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 min-w-[160px]">
-                            <option value="">All Categories</option>
+            <!-- Search and Filters (minimal) -->
+            <div class="mb-10 pb-8 border-b border-gray-200/80 dark:border-gray-700/80">
+                <form method="GET" action="{{ route('agents.explore') }}" class="flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-2">
+                        <div class="relative flex-1 min-w-[200px]">
+                            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <input type="search" name="search" id="search" value="{{ request('search') }}"
+                                placeholder="{{ __('Search…') }}"
+                                aria-label="{{ __('Search agents') }}"
+                                class="w-full pl-9 pr-14 py-2 text-sm rounded-lg border-0 ring-1 ring-gray-200 dark:ring-gray-600 bg-gray-50/80 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/30 focus:bg-white dark:focus:bg-gray-900 transition-colors">
+                            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200" aria-label="{{ __('Search') }}">
+                                {{ __('Go') }}
+                            </button>
+                        </div>
+
+                        <div class="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-600 shrink-0" aria-hidden="true"></div>
+
+                        <select name="category" id="category" onchange="this.form.submit()" aria-label="{{ __('Category') }}"
+                            class="py-2 pl-3 pr-8 text-sm rounded-lg border-0 ring-1 ring-gray-200 dark:ring-gray-600 bg-gray-50/80 dark:bg-gray-900/50 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500/30 cursor-pointer min-w-[140px] sm:min-w-0">
+                            <option value="">{{ __('All categories') }}</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                                     {{ $category->name }}
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-                    
-                    <div>
-                        <label for="pricing_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pricing</label>
-                        <select name="pricing_type" id="pricing_type" class="rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 min-w-[140px]">
-                            <option value="">All Types</option>
-                            <option value="free" {{ request('pricing_type') == 'free' ? 'selected' : '' }}>Free</option>
-                            <option value="paid" {{ request('pricing_type') == 'paid' ? 'selected' : '' }}>Paid</option>
-                            <option value="freemium" {{ request('pricing_type') == 'freemium' ? 'selected' : '' }}>Freemium</option>
+
+                        <select name="pricing_type" id="pricing_type" onchange="this.form.submit()" aria-label="{{ __('Pricing') }}"
+                            class="py-2 pl-3 pr-8 text-sm rounded-lg border-0 ring-1 ring-gray-200 dark:ring-gray-600 bg-gray-50/80 dark:bg-gray-900/50 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500/30 cursor-pointer">
+                            <option value="">{{ __('Any price') }}</option>
+                            <option value="free" {{ request('pricing_type') == 'free' ? 'selected' : '' }}>{{ __('Free') }}</option>
+                            <option value="paid" {{ request('pricing_type') == 'paid' ? 'selected' : '' }}>{{ __('Paid') }}</option>
+                            <option value="freemium" {{ request('pricing_type') == 'freemium' ? 'selected' : '' }}>{{ __('Freemium') }}</option>
+                        </select>
+
+                        <select name="sort" id="sort" onchange="this.form.submit()" aria-label="{{ __('Sort') }}"
+                            class="py-2 pl-3 pr-8 text-sm rounded-lg border-0 ring-1 ring-gray-200 dark:ring-gray-600 bg-gray-50/80 dark:bg-gray-900/50 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500/30 cursor-pointer">
+                            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>{{ __('Latest') }}</option>
+                            <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>{{ __('Popular') }}</option>
+                            <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>{{ __('Top rated') }}</option>
                         </select>
                     </div>
-                    
-                    <div>
-                        <label for="sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort</label>
-                        <select name="sort" id="sort" class="rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 min-w-[140px]">
-                            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest</option>
-                            <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Popular</option>
-                            <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>Highest Rated</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <button type="submit" class="inline-flex items-center bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                            </svg>
-                            Filter
-                        </button>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <span>{{ number_format($agents->total()) }} {{ __('agents') }}</span>
+                        @if(request()->filled('search') || request()->filled('category') || request()->filled('pricing_type') || (request('sort') && request('sort') !== 'latest'))
+                            <a href="{{ route('agents.explore') }}" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
+                                {{ __('Reset filters') }}
+                            </a>
+                        @endif
                     </div>
                 </form>
             </div>
 
             <!-- Agents Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-12">
                 @forelse($agents as $agent)
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-gray-200 dark:border-gray-700 group">
-                        @if($agent->featured_image)
-                            <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                                <img src="{{ $agent->featured_image }}" alt="{{ $agent->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                    <a href="{{ route('agents.show', $agent) }}" class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 group">
+                        <div class="flex items-start gap-3">
+                            <div class="w-11 h-11 rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-center justify-center shrink-0">
+                                @if($agent->featured_image)
+                                    <img src="{{ $agent->featured_image }}" alt="{{ $agent->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+                                @else
+                                    <span class="text-sm font-bold text-indigo-600 dark:text-indigo-300">{{ strtoupper(substr($agent->name, 0, 1)) }}</span>
+                                @endif
                             </div>
-                        @endif
-                        <div class="p-6">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                    <a href="{{ route('agents.show', $agent) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400">
-                                        {{ $agent->name }}
-                                    </a>
-                                </h3>
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                    {{ $agent->pricing_type === 'free' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : '' }}
-                                    {{ $agent->pricing_type === 'paid' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : '' }}
-                                    {{ $agent->pricing_type === 'freemium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : '' }}">
-                                    {{ ucfirst($agent->pricing_type) }}
-                                </span>
-                            </div>
-                            
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                                {{ $agent->description }}
-                            </p>
-                            
-                            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                    </svg>
-                                    {{ number_format($agent->averageRating(), 1) }} ({{ $agent->reviewsCount() }})
-                                </span>
-                                <span>{{ $agent->views }} views</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $agent->category->name }}
-                                </span>
-                                <a href="{{ route('agents.show', $agent) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105">
-                                    View Details
-                                    <svg class="w-3 h-3 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </a>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" title="{{ $agent->name }}">{{ $agent->name }}</p>
+                                <p class="mt-1 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{{ $agent->description }}</p>
+                                <p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                    {{ number_format($agent->averageRating(), 1) }}/5 · {{ $agent->reviewsCount() }} reviews
+                                </p>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @empty
                     <div class="col-span-full text-center py-16">
                         <div class="max-w-md mx-auto">
